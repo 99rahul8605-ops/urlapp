@@ -1,0 +1,38 @@
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - mongo_data:/data/db
+    networks: [internal]
+  app:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      MONGO_URI: mongodb://mongo:27017/expose
+      PORT: "8080"
+    depends_on: [mongo]
+    networks: [internal]
+  caddy:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile.caddy
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./infra/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on: [app]
+    networks: [internal]
+networks:
+  internal:
+volumes:
+  mongo_data:
+  caddy_data:
+  caddy_config:

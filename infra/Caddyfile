@@ -1,0 +1,11 @@
+{
+    email admin@{$BASE_DOMAIN}
+}
+
+*.{$BASE_DOMAIN} {
+    tls {
+        dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+    }
+    encode zstd gzip
+    reverse_proxy app:8080
+}
